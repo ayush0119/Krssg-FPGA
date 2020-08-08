@@ -22,7 +22,7 @@ module test( input clk,input Rx_in ,output [7:0]Rx_data ,output Rx_done);
 parameter rate = 400; //for 25000 baud rate
 
 reg [2:0] state = 0;
-reg [2:0] next_state = 0; 
+reg [2:0] state = 0; 
 parameter IDLE = 0,Start_bit = 1,Data = 2,Stop_bit = 3, Latch = 4;
 
 reg rx_data = 0,rx_temp = 0;
@@ -46,9 +46,9 @@ begin
 		bit_count = 0;
 		clk_count = 0;
 		if (~rx_data)
-			next_state <= Start_bit;
+			state <= Start_bit;
 		else
-			next_state <= IDLE;
+			state <= IDLE;
 	end
 	
 	Start_bit : 
@@ -57,13 +57,13 @@ begin
 			if(rx_data == 0)
 				begin
 				clk_count <= 0;
-				next_state <= Data;
+				state <= Data;
 				end
 			else
-				next_state <= IDLE;
+				state <= IDLE;
 		else
 			begin
-			next_state <= Start_bit;
+			state <= Start_bit;
 			clk_count <= clk_count + 1;
 			end
 	end
@@ -77,18 +77,18 @@ begin
 			if (bit_count < 7)
 				begin
 				bit_count <= bit_count +1;
-				next_state <= Data;
+				state <= Data;
 				end
 			else
 				begin
 				bit_count <= 0;
-				next_state <= Stop_bit;
+				state <= Stop_bit;
 				end
 			end
 		else
 			begin
 			clk_count <= clk_count + 1;
-			next_state <= Data;
+			state <= Data;
 			end
 	end
 	
@@ -97,20 +97,20 @@ begin
 		if (clk_count == rate -1 )
 			begin
 			clk_count <= 0;
-			next_state <= Latch ;
+			state <= Latch ;
 			Rx_done <= 1;
 			end
 		else
 			begin
 			clk_count <= clk_count +1;
-			next_state <= Stop_bit;
+			state <= Stop_bit;
 			end
 	end
 	
 	Latch : 
 	begin
 	Rx_data <= 0;
-	next_state <= IDLE;
+	state <= IDLE;
 	end
 	endcase
 end
